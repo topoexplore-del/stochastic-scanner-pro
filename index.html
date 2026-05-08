@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stochastic Scanner Pro</title>
+<style>
+:root {
+  --bg1: #0a0a0f; --bg2: #12131a; --bg3: #1a1b25; --bg4: #22232e;
+  --bd: #2a2b36;
+  --txt1: #f0f1f5; --txt2: #a0a2ac; --txt3: #707280;
+  --green: #00E676; --red: #FF5252; --amber: #FFB300;
+  --blue: #2196F3; --purple: #9C27B0; --cyan: #00BCD4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg1); color: var(--txt1); font-size: 13px; line-height: 1.4;
+}
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ═══ HEADER ═══ */
+.header {
+  background: linear-gradient(90deg, #0a0a0f, #12131a, #0a0a0f);
+  border-bottom: 1px solid var(--bd);
+  padding: 16px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  font-size: 18px; font-weight: 700; letter-spacing: 1px;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.logo-text { background: linear-gradient(90deg, var(--cyan), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.logo-sub { color: var(--txt3); font-size: 10px; font-weight: 400; letter-spacing: 1.5px; }
+.meta { display: flex; gap: 16px; font-size: 11px; color: var(--txt2); align-items: center; }
+.meta-item { display: flex; flex-direction: column; align-items: flex-end; }
+.meta-item > span:first-child { color: var(--txt3); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+.meta-item > span:last-child { color: var(--txt1); font-weight: 600; }
+
+/* ═══ SUMMARY STRIP ═══ */
+.summary {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; background: var(--bd); margin: 0;
+}
+.sum-cell {
+  background: var(--bg2); padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sum-label { font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.5px; }
+.sum-value { font-size: 20px; font-weight: 700; color: var(--txt1); }
+.sum-value.green { color: var(--green); }
+.sum-value.amber { color: var(--amber); }
+.sum-value.red { color: var(--red); }
+.sum-detail { font-size: 10px; color: var(--txt2); }
+
+/* ═══ CONTROLS ═══ */
+.controls {
+  background: var(--bg2); border-bottom: 1px solid var(--bd);
+  padding: 10px 24px; display: flex; gap: 12px; align-items: center;
+  flex-wrap: wrap;
+}
+.ctrl-group { display: flex; align-items: center; gap: 6px; }
+.ctrl-label { font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.5px; }
+.ctrl-select, .ctrl-input {
+  background: var(--bg3); color: var(--txt1);
+  border: 1px solid var(--bd); border-radius: 4px;
+  padding: 6px 10px; font-size: 12px; font-family: inherit;
+  cursor: pointer;
+}
+.ctrl-select:hover, .ctrl-input:focus { border-color: var(--blue); outline: none; }
+.spacer { flex: 1; }
+.refresh-btn {
+  background: var(--blue); color: white;
+  border: none; border-radius: 4px;
+  padding: 6px 14px; font-size: 12px; cursor: pointer;
+  font-weight: 600;
+}
+.refresh-btn:hover { background: var(--cyan); }
+
+/* ═══ MAIN CONTENT ═══ */
+.main {
+  flex: 1;
+  padding: 16px 24px;
+}
+
+/* ═══ DISCLAIMER BANNER ═══ */
+.disclaimer {
+  background: linear-gradient(90deg, #2a1a1a, #1a2a2a);
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 11px; line-height: 1.6;
+}
+.disclaimer-title {
+  color: var(--amber); font-weight: 700; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.disclaimer-body { color: var(--txt2); }
+.disclaimer-body b { color: var(--txt1); }
+
+/* ═══ TICKER GRID ═══ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 12px;
+}
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  padding: 12px;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: var(--blue); }
+
+.card-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: 8px; border-bottom: 1px solid var(--bd);
+  margin-bottom: 10px;
+}
+.card-ticker { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; }
+.card-price { font-size: 13px; color: var(--txt2); }
+
+/* Probability row */
+.prob-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-bottom: 10px;
+}
+.prob-cell {
+  padding: 8px 10px;
+  background: var(--bg3); border-radius: 6px;
+}
+.prob-label { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.5px; }
+.prob-value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+.prob-detail { font-size: 10px; color: var(--txt2); margin-top: 2px; }
+
+/* Confidence Interval */
+.ci-wrap { margin-bottom: 10px; }
+.ci-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.ci-label { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.5px; }
+.ci-range { font-size: 10px; color: var(--txt2); }
+.ci-track {
+  position: relative; height: 26px;
+  background: var(--bg3); border-radius: 4px;
+  overflow: hidden;
+}
+.ci-fill {
+  position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(90deg, rgba(255,82,82,0.2), rgba(0,230,118,0.2));
+}
+.ci-marker {
+  position: absolute; top: -2px; bottom: -2px;
+  width: 2px; background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+}
+.ci-ends {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 9px; color: var(--txt2); padding: 0 6px;
+  font-family: monospace;
+}
+.ci-ends.left { left: 0; }
+.ci-ends.right { right: 0; }
+
+/* TP Probabilities strip */
+.tp-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+  margin-bottom: 10px;
+}
+.tp-cell {
+  text-align: center; padding: 6px;
+  background: var(--bg3); border-radius: 4px;
+}
+.tp-label { font-size: 9px; color: var(--txt3); }
+.tp-value { font-size: 12px; font-weight: 700; margin-top: 2px; }
+
+/* Risk metrics */
+.risk-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  margin-bottom: 10px;
+}
+.risk-cell {
+  padding: 6px 8px; border-radius: 4px;
+  background: #2a1a1a;
+}
+.risk-cell.severe { background: #3a1a1a; }
+.risk-label { font-size: 9px; color: var(--txt3); }
+.risk-value { font-size: 12px; font-weight: 700; color: var(--red); margin-top: 2px; }
+
+/* Mini chart */
+.chart-wrap { margin-bottom: 10px; }
+.chart-label { font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.minichart {
+  width: 100%; height: 48px; background: var(--bg3); border-radius: 4px;
+  display: block;
+}
+
+/* Meta footer */
+.meta-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9px; color: var(--txt3);
+  padding-top: 8px; border-top: 1px solid var(--bd);
+  flex-wrap: wrap; gap: 4px;
+}
+.meta-footer b { color: var(--txt1); font-size: 10px; }
+.badge {
+  display: inline-block; padding: 2px 6px; border-radius: 3px;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.5px;
+}
+.badge.green { background: rgba(0,230,118,0.15); color: var(--green); }
+.badge.amber { background: rgba(255,179,0,0.15); color: var(--amber); }
+.badge.red { background: rgba(255,82,82,0.15); color: var(--red); }
+.badge.blue { background: rgba(33,150,243,0.15); color: var(--blue); }
+.badge.purple { background: rgba(156,39,176,0.15); color: var(--purple); }
+
+/* Horizon strip */
+.horizon-strip {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px;
+  margin-bottom: 10px;
+}
+.horizon-cell {
+  text-align: center; padding: 4px 2px;
+  background: var(--bg3); border-radius: 3px;
+  font-size: 9px;
+}
+.horizon-name { color: var(--txt3); }
+.horizon-prob { color: var(--txt1); font-weight: 700; margin-top: 1px; font-size: 11px; }
+.horizon-up { font-size: 9px; margin-top: 1px; }
+
+/* Footer */
+.footer {
+  padding: 16px 24px; border-top: 1px solid var(--bd);
+  color: var(--txt3); font-size: 10px;
+  display: flex; justify-content: space-between;
+}
+.footer b { color: var(--txt2); }
+
+/* Loading & empty */
+.loading, .empty {
+  padding: 60px 24px; text-align: center; color: var(--txt3);
+}
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--bd); border-top-color: var(--cyan);
+  border-radius: 50%; animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .header { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+  .controls { padding: 8px 16px; }
+  .main { padding: 12px 16px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <div>
+      <div class="logo-text">STOCHASTIC SCANNER PRO</div>
+      <div class="logo-sub">MONTE CARLO · GARCH(1,1) · T-STUDENT · CALIBRATED</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="meta-item">
+      <span>Built at</span>
+      <span id="built-at">—</span>
+    </div>
+    <div class="meta-item">
+      <span>Version</span>
+      <span id="version">1.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY STRIP -->
+<div class="summary" id="summary"></div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="ctrl-group">
+    <span class="ctrl-label">Group</span>
+    <select class="ctrl-select" id="filter-group" onchange="render()">
+      <option value="all">All groups</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Horizon</span>
+    <select class="ctrl-select" id="filter-horizon" onchange="render()">
+      <option value="1_semana">1 week (5d)</option>
+      <option value="2_semanas">2 weeks (10d)</option>
+      <option value="1_mes" selected>1 month (21d)</option>
+      <option value="3_meses">3 months (63d)</option>
+      <option value="6_meses">6 months (126d)</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Sort by</span>
+    <select class="ctrl-select" id="sort-by" onchange="render()">
+      <option value="upside">Upside %</option>
+      <option value="prob_up" selected>Prob UP</option>
+      <option value="sharpe">Sharpe-like</option>
+      <option value="tp5">Prob TP+5%</option>
+      <option value="var">Lowest VaR (safest)</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Filter</span>
+    <select class="ctrl-select" id="filter-mode" onchange="render()">
+      <option value="all">All tickers</option>
+      <option value="reliable">Reliable data (≥60d)</option>
+      <option value="garch">GARCH-fitted only</option>
+      <option value="high_prob">Prob UP ≥ 60%</option>
+      <option value="trending">In TREND regimes</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Search</span>
+    <input class="ctrl-input" id="search" placeholder="AAPL, SPY..." oninput="render()">
+  </div>
+  <div class="spacer"></div>
+  <button class="refresh-btn" onclick="loadData()">↻ Reload</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="disclaimer">
+    <div class="disclaimer-title">⚠ Probabilities are model ESTIMATES, not guarantees</div>
+    <div class="disclaimer-body">
+      This system runs 10,000 Monte Carlo simulations per ticker using GARCH(1,1) time-varying volatility and t-student innovations. The statistics are based on standard financial mathematics (Monte Carlo since 1970s, GARCH since 1980s). <b>This is NOT a crystal ball.</b> Always validate calibration with <code>calibration_backtest.py</code> before trusting probabilities. Past performance does not predict future results.
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <div>Loading snapshot.json...</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>
+    <b>Stochastic Scanner Pro v1.0</b> · Independent stochastic projection system
+  </div>
+  <div>
+    Data: Yahoo Finance · Engine: scipy + GARCH · License: no warranty
+  </div>
+</div>
+
+</div>
+
+<script>
+var snapshot = null;
+
+async function loadData() {
+  var el = document.getElementById("content");
+  el.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div>Loading snapshot.json...</div></div>';
+  try {
+    var r = await fetch("data/snapshot.json?t=" + Date.now());
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    snapshot = await r.json();
+    document.getElementById("built-at").textContent = formatDate(snapshot.built_at);
+    document.getElementById("version").textContent = snapshot.version || "1.0";
+    populateGroupFilter();
+    renderSummary();
+    render();
+  } catch (err) {
+    el.innerHTML = '<div class="empty"><div style="color:var(--red);font-size:14px;margin-bottom:10px">Error loading data</div><div style="color:var(--amber);margin-bottom:10px">' + err.message + '</div><div>Run <code style="background:var(--bg3);padding:2px 6px;border-radius:3px">python scripts/build_data.py</code> to generate data.</div></div>';
+  }
+}
+
+function formatDate(iso) {
+  if (!iso) return "—";
+  try {
+    var d = new Date(iso);
+    return d.toLocaleString("en-GB", { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  } catch (e) { return iso.substring(0, 16); }
+}
+
+function allTickers() {
+  if (!snapshot || !snapshot.groups) return [];
+  var out = [];
+  Object.keys(snapshot.groups).forEach(function (g) {
+    snapshot.groups[g].forEach(function (t) {
+      t._group = g; out.push(t);
+    });
+  });
+  return out;
+}
+
+function populateGroupFilter() {
+  var sel = document.getElementById("filter-group");
+  sel.innerHTML = '<option value="all">All groups</option>';
+  if (!snapshot || !snapshot.groups) return;
+  Object.keys(snapshot.groups).forEach(function (g) {
+    var n = snapshot.groups[g].length;
+    var o = document.createElement("option");
+    o.value = g; o.textContent = g + " (" + n + ")";
+    sel.appendChild(o);
+  });
+}
+
+function renderSummary() {
+  var ts = allTickers();
+  var total = ts.length;
+  var reliable = ts.filter(function (t) { return t.reliable; }).length;
+  var highProb = ts.filter(function (t) { return t.prob_up >= 60; }).length;
+  var strongUp = ts.filter(function (t) { return t.upside_pct >= 5; }).length;
+  var avgProb = total > 0 ? ts.reduce(function (s, t) { return s + t.prob_up; }, 0) / total : 0;
+  var avgVol = total > 0 ? ts.reduce(function (s, t) { return s + (t.volatility_annualized || 0); }, 0) / total : 0;
+  var regimes = {};
+  ts.forEach(function (t) { regimes[t.regime] = (regimes[t.regime] || 0) + 1; });
+  var topRegime = Object.keys(regimes).sort(function (a, b) { return regimes[b] - regimes[a]; })[0] || "—";
+
+  var h = "";
+  h += '<div class="sum-cell"><span class="sum-label">Total Tickers</span><span class="sum-value">' + total + '</span><span class="sum-detail">' + reliable + ' reliable</span></div>';
+  h += '<div class="sum-cell"><span class="sum-label">Avg Prob UP</span><span class="sum-value ' + (avgProb >= 55 ? "green" : avgProb >= 50 ? "amber" : "red") + '">' + avgProb.toFixed(1) + '%</span><span class="sum-detail">1 month horizon</span></div>';
+  h += '<div class="sum-cell"><span class="sum-label">High Conviction</span><span class="sum-value green">' + highProb + '</span><span class="sum-detail">Prob UP ≥ 60%</span></div>';
+  h += '<div class="sum-cell"><span class="sum-label">Strong Upside</span><span class="sum-value green">' + strongUp + '</span><span class="sum-detail">Upside ≥ 5%</span></div>';
+  h += '<div class="sum-cell"><span class="sum-label">Avg Volatility</span><span class="sum-value">' + avgVol.toFixed(1) + '%</span><span class="sum-detail">Annualized</span></div>';
+  h += '<div class="sum-cell"><span class="sum-label">Dominant Regime</span><span class="sum-value" style="font-size:14px">' + topRegime + '</span><span class="sum-detail">' + (regimes[topRegime] || 0) + ' tickers</span></div>';
+  document.getElementById("summary").innerHTML = h;
+}
+
+function render() {
+  var el = document.getElementById("content");
+  if (!snapshot) return;
+
+  var ts = allTickers();
+  var group = document.getElementById("filter-group").value;
+  var horizon = document.getElementById("filter-horizon").value;
+  var sort = document.getElementById("sort-by").value;
+  var filter = document.getElementById("filter-mode").value;
+  var search = document.getElementById("search").value.trim().toUpperCase();
+
+  // Filter
+  if (group !== "all") ts = ts.filter(function (t) { return t._group === group; });
+  if (filter === "reliable") ts = ts.filter(function (t) { return t.reliable; });
+  if (filter === "garch") ts = ts.filter(function (t) { return t.vol_method === "garch(1,1)"; });
+  if (filter === "high_prob") ts = ts.filter(function (t) { return t.prob_up >= 60; });
+  if (filter === "trending") ts = ts.filter(function (t) { return t.regime === "TREND" || t.regime === "STRONG_TREND"; });
+  if (search) ts = ts.filter(function (t) { return t.ticker.indexOf(search) !== -1; });
+
+  // Pick horizon-specific fields
+  ts.forEach(function (t) {
+    var h = t.horizons && t.horizons[horizon];
+    if (h) {
+      t._horProb = h.prob_up;
+      t._horExpected = h.expected;
+      t._horUpside = h.upside_pct;
+      t._horCiLow = h.ci_68_low;
+      t._horCiHigh = h.ci_68_high;
+    } else {
+      t._horProb = t.prob_up;
+      t._horExpected = t.target;
+      t._horUpside = t.upside_pct;
+      t._horCiLow = t.ci_68_low;
+      t._horCiHigh = t.ci_68_high;
+    }
+    var vol = t.volatility_annualized || 30;
+    t._sharpe = vol > 0 ? t._horUpside / (vol / Math.sqrt(12)) : 0;
+  });
+
+  // Sort
+  if (sort === "upside") ts.sort(function (a, b) { return b._horUpside - a._horUpside; });
+  else if (sort === "prob_up") ts.sort(function (a, b) { return b._horProb - a._horProb; });
+  else if (sort === "sharpe") ts.sort(function (a, b) { return b._sharpe - a._sharpe; });
+  else if (sort === "tp5") ts.sort(function (a, b) { return (b.prob_tp5 || 0) - (a.prob_tp5 || 0); });
+  else if (sort === "var") ts.sort(function (a, b) { return (b.var_95 || 0) - (a.var_95 || 0); });
+
+  if (ts.length === 0) {
+    el.innerHTML = '<div class="empty">No tickers match the current filters.</div>';
+    return;
+  }
+
+  var h = '<div class="grid">';
+  ts.forEach(function (t) { h += renderCard(t); });
+  h += '</div>';
+  el.innerHTML = h;
+}
+
+function renderCard(t) {
+  var probColor = t._horProb >= 65 ? "green" : t._horProb >= 55 ? "amber" : t._horProb >= 45 ? "" : "red";
+  var upColor = t._horUpside >= 5 ? "green" : t._horUpside >= 0 ? "amber" : "red";
+  var regimeBadge = {
+    "STRONG_TREND": "green", "TREND": "green",
+    "COMPRESSION": "amber", "RANGE": "blue",
+    "HIGH_VOL": "red"
+  }[t.regime] || "";
+  var reliableBadge = t.reliable ? '<span class="badge green">★ reliable</span>' : '<span class="badge amber">⚠ limited data</span>';
+  var volBadge = t.vol_method === "garch(1,1)" ? '<span class="badge purple">GARCH</span>' : t.vol_method === "ewma" ? '<span class="badge blue">EWMA</span>' : '';
+
+  var h = '<div class="card">';
+
+  // Header
+  h += '<div class="card-head">';
+  h += '<div><span class="card-ticker">' + t.ticker + '</span> <span style="color:var(--txt3);font-size:10px">' + (t._group || "") + '</span></div>';
+  h += '<div class="card-price">$' + t.close.toFixed(2) + '</div>';
+  h += '</div>';
+
+  // Prob row
+  h += '<div class="prob-row">';
+  h += '<div class="prob-cell"><div class="prob-label">Prob UP @ horizon</div><div class="prob-value ' + probColor + '">' + t._horProb.toFixed(1) + '%</div><div class="prob-detail">MC 10k paths</div></div>';
+  h += '<div class="prob-cell"><div class="prob-label">Expected target</div><div class="prob-value" style="font-size:18px">$' + t._horExpected.toFixed(2) + '</div><div class="prob-detail" style="color:var(--' + (upColor) + ')">' + (t._horUpside >= 0 ? "+" : "") + t._horUpside.toFixed(1) + '%</div></div>';
+  h += '</div>';
+
+  // Mini chart
+  if (t.history_60d && t.history_60d.length > 0) {
+    h += '<div class="chart-wrap">';
+    h += '<div class="chart-label">Last 60 days</div>';
+    h += renderMiniChart(t.history_60d, t._horExpected, t._horCiLow, t._horCiHigh);
+    h += '</div>';
+  }
+
+  // CI 68%
+  h += '<div class="ci-wrap">';
+  h += '<div class="ci-header"><span class="ci-label">68% Confidence Interval</span><span class="ci-range">±1σ</span></div>';
+  h += renderCIBar(t.close, t._horCiLow, t._horCiHigh);
+  h += '</div>';
+
+  // TP probabilities
+  h += '<div class="tp-strip">';
+  h += '<div class="tp-cell"><div class="tp-label">Prob +3%</div><div class="tp-value">' + (t.prob_tp3 || 0).toFixed(0) + '%</div></div>';
+  h += '<div class="tp-cell"><div class="tp-label">Prob +5%</div><div class="tp-value">' + (t.prob_tp5 || 0).toFixed(0) + '%</div></div>';
+  h += '<div class="tp-cell"><div class="tp-label">Prob +10%</div><div class="tp-value">' + (t.prob_tp10 || 0).toFixed(0) + '%</div></div>';
+  h += '</div>';
+
+  // Risk
+  h += '<div class="risk-row">';
+  h += '<div class="risk-cell"><div class="risk-label">VaR 95%</div><div class="risk-value">$' + (t.var_95 || 0).toFixed(2) + '</div></div>';
+  h += '<div class="risk-cell severe"><div class="risk-label">CVaR 95%</div><div class="risk-value">$' + (t.cvar_95 || 0).toFixed(2) + '</div></div>';
+  h += '</div>';
+
+  // Multi-horizon mini strip
+  if (t.horizons) {
+    h += '<div class="horizon-strip">';
+    ["1_semana", "2_semanas", "1_mes", "3_meses", "6_meses"].forEach(function (k) {
+      var hz = t.horizons[k];
+      if (!hz) return;
+      var label = { "1_semana": "1w", "2_semanas": "2w", "1_mes": "1m", "3_meses": "3m", "6_meses": "6m" }[k];
+      var pu = hz.prob_up || 0;
+      var us = hz.upside_pct || 0;
+      var puCol = pu >= 60 ? "var(--green)" : pu >= 50 ? "var(--amber)" : "var(--red)";
+      var usCol = us >= 0 ? "var(--green)" : "var(--red)";
+      h += '<div class="horizon-cell"><div class="horizon-name">' + label + '</div><div class="horizon-prob" style="color:' + puCol + '">' + pu.toFixed(0) + '%</div><div class="horizon-up" style="color:' + usCol + '">' + (us >= 0 ? "+" : "") + us.toFixed(1) + '%</div></div>';
+    });
+    h += '</div>';
+  }
+
+  // Meta footer
+  h += '<div class="meta-footer">';
+  h += '<div>Vol: <b>' + (t.volatility_annualized || 0).toFixed(1) + '%/yr</b></div>';
+  h += '<div><span class="badge ' + regimeBadge + '">' + t.regime + '</span></div>';
+  h += '<div>' + reliableBadge + volBadge + '</div>';
+  h += '</div>';
+
+  h += '</div>';
+  return h;
+}
+
+function renderMiniChart(prices, target, ciLow, ciHigh) {
+  var w = 360, hgt = 48;
+  var mn = Math.min.apply(null, prices);
+  var mx = Math.max.apply(null, prices);
+  if (ciLow && ciLow < mn) mn = ciLow * 0.98;
+  if (ciHigh && ciHigh > mx) mx = ciHigh * 1.02;
+  var rng = mx - mn || 1;
+
+  var pts = prices.map(function (p, i) {
+    var x = (i / (prices.length - 1)) * w;
+    var y = hgt - ((p - mn) / rng) * hgt;
+    return x.toFixed(1) + "," + y.toFixed(1);
+  }).join(" ");
+
+  var lastPrice = prices[prices.length - 1];
+  var targetY = target ? hgt - ((target - mn) / rng) * hgt : null;
+  var lastColor = lastPrice > prices[0] ? "var(--green)" : "var(--red)";
+
+  var svg = '<svg class="minichart" viewBox="0 0 ' + w + ' ' + hgt + '" preserveAspectRatio="none">';
+  // CI band (light)
+  if (ciLow && ciHigh) {
+    var loY = hgt - ((ciLow - mn) / rng) * hgt;
+    var hiY = hgt - ((ciHigh - mn) / rng) * hgt;
+    svg += '<rect x="' + (w - 10) + '" y="' + Math.min(loY, hiY) + '" width="10" height="' + Math.abs(loY - hiY) + '" fill="rgba(33,150,243,0.2)"/>';
+  }
+  svg += '<polyline points="' + pts + '" fill="none" stroke="' + lastColor + '" stroke-width="1.5"/>';
+  // Target line
+  if (targetY !== null) {
+    svg += '<line x1="0" y1="' + targetY + '" x2="' + w + '" y2="' + targetY + '" stroke="var(--amber)" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.7"/>';
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+function renderCIBar(current, lo, hi) {
+  if (!lo || !hi || hi <= lo) return '<div class="ci-track"><div class="ci-fill"></div></div>';
+  var pos = ((current - lo) / (hi - lo)) * 100;
+  pos = Math.max(2, Math.min(98, pos));
+  var h = '<div class="ci-track">';
+  h += '<div class="ci-fill"></div>';
+  h += '<div class="ci-marker" style="left:' + pos + '%"></div>';
+  h += '<div class="ci-ends left">$' + lo.toFixed(2) + '</div>';
+  h += '<div class="ci-ends right">$' + hi.toFixed(2) + '</div>';
+  h += '</div>';
+  return h;
+}
+
+// Initial load
+loadData();
+</script>
+</body>
+</html>
