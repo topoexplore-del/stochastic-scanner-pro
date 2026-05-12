@@ -81,11 +81,14 @@ TICKER_GROUPS = {
         "YUM", "DPZ", "HGTY", "SMG", "UBER", "BF.A", "BF.B", "SYY", "NVR", "ROL", "LAMR", "HXL", "EMN", "EXP", "WY", "SONY",
         "HTZ", "QSR", "HHH", "SEG", "VRSN", "ALLY", "JEF", "DVA", "LPX",
         "LLYVK", "LEN", "LEN.B", "FWONK", "LILA", "LILAK", "BATRK", "KHC", "KR", "SIRI", "LLYVA", "NYT", "NNE",
+        "CRWV", "CORZ", "IREN", "VST", "APLD", "BE", "CIFR", "GEV", "DY", "EME", "STRL", "MTZ", "FLNC", "LEU", "SHLS",
+        "CIEN", "TTMI", "SITM", "VICR", "AEHR", "NVTS", "CLS", "FN", "RRX", "NVT", "FOX", "OKLO", "KRMN", "LOAR", "KNF", "AEM", "TTAN",
+        "MNDY", "QNTM", "CVKD", "OCGN", "UMAC", "FICO", "APP", "MDB", "DASH", "GEV", "KTOS",
     ],
     "US Tech": [
         "ORCL", "CRM", "AMD", "INTC", "QCOM", "TXN", "NOW",
         "UBER", "SHOP", "PLTR", "COIN", "SNOW", "DDOG", "ZS",
-        "CRWD", "NET", "PANW", "ABNB", "SPOT",
+        "CRWD", "NET", "PANW", "ABNB", "SPOT", "INTC", "SMH", "LITE", "SNDK", "RBRK",
     ],
     "US Finance": [
         "GS", "MS", "C", "WFC", "AXP", "BLK", "SCHW", "PYPL",
